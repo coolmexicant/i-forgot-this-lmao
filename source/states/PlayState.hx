@@ -83,24 +83,12 @@ class PlayState extends MusicBeatState
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
 
-	public static var ratingStuff:Array<Dynamic> = [
-		['You Suck!', 0.2], //From 0% to 19%
-		['Shit', 0.4], //From 20% to 39%
-		['Bad', 0.5], //From 40% to 49%
-		['Bruh', 0.6], //From 50% to 59%
-		['Meh', 0.69], //From 60% to 68%
-		['Nice', 0.7], //69%
-		['Good', 0.8], //From 70% to 79%
-		['Great', 0.9], //From 80% to 89%
-		['Sick!', 1], //From 90% to 99%
-		['Perfect!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
-	];
-
 	//event variables
 	private var isCameraOnForcedPos:Bool = false;
 
 	var pauseBlur:BlurFilter;
 	var pauseGlow:GlowFilter;
+	var die:Float = 0;
 
 	public var guiSize(get, null):FlxPoint;
 	private function get_guiSize():FlxPoint
@@ -231,6 +219,9 @@ class PlayState extends MusicBeatState
 	public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
 	public var cameraSpeed:Float = 1;
+
+	public var numberOfNotes:Float = 0;
+	public var numberOfArrowNotes:Float = 0;
 
 	public var songScore:Int = 0;
 	public var songHits:Int = 0;
@@ -498,7 +489,7 @@ class PlayState extends MusicBeatState
 
 		Conductor.songPosition = -5000 / Conductor.songPosition;
 		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
-		timeTxt.setFormat(Paths.font("pixel.otf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timeTxt.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeTxt.scrollFactor.set();
 		timeTxt.alpha = 0;
 		timeTxt.borderSize = 2;
@@ -568,14 +559,14 @@ class PlayState extends MusicBeatState
 		uiGroup.add(iconP2);
 
 		scoreTxt = new FlxText(0, healthBar.y + 30, guiSize.x, '', 20);
-		scoreTxt.setFormat(Paths.font("pixel.otf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		scoreTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		uiGroup.add(scoreTxt);
 
 		botplayTxt = new FlxText(400, timeBar.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("pixel.otf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.visible = cpuControlled;
@@ -1635,7 +1626,12 @@ class PlayState extends MusicBeatState
 
 		super.update(elapsed);
 
-		var tempScore:String = 'Score: $songScore ${!instakillOnMiss ? ' | Misses: $songMisses' : ''} | Accuracy: ${CoolUtil.truncateFloat(ratingPercent*100,2)}% | Average: ${sex}ms | Health: ${CoolUtil.luaRound(health * 50, 0)}%';
+		var tempScore:String;
+		if(totalNotesHit==0 && totalPlayed==0)
+			tempScore = 'Score: $songScore ${!instakillOnMiss ? ' | Misses: $songMisses' : ''} | Accuracy: $ratingPercent% | Average: ${sex}ms | N/A';
+		else
+			tempScore = 'Score: $songScore ${!instakillOnMiss ? ' | Misses: $songMisses' : ''} | Accuracy: $ratingPercent% | Average: ${sex}ms | $ratingName ($ratingFC)';
+
 		scoreTxt.text = '${tempScore}\n';
 
 		if (scoreTxt != null)
@@ -2525,6 +2521,12 @@ class PlayState extends MusicBeatState
 		var rating:FlxSprite = new FlxSprite();
 		var score:Int = 350;
 
+		numberOfArrowNotes++;
+		numberOfNotes++;
+
+		var accShit = FlxMath.bound(noteDiff - 1, 0, Conductor.safeZoneOffset) / Conductor.safeZoneOffset;
+		die += 1 - (accShit * accShit); // easier accuracy
+
 		//tryna do MS based judgment due to popular demand
 		var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);
 
@@ -2851,6 +2853,9 @@ class PlayState extends MusicBeatState
 				invalidateNote(note);
 		});
 
+		numberOfArrowNotes++;
+		numberOfNotes++;
+
 		noteMissCommon(daNote.noteData, daNote);
 		var result:Dynamic = callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('noteMiss', [daNote]);
@@ -3057,6 +3062,12 @@ class PlayState extends MusicBeatState
 			if(combo > 9999) combo = 9999;
 			popUpScore(note);
 		}
+
+		if(note.isSustainNote){
+			numberOfNotes += 0.25;
+			die += 0.25;
+		}
+
 		var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
 		if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
 		if (gainHealth) health += note.hitHealth * healthGain;
@@ -3464,7 +3475,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public var ratingName:String = '?';
+	public var ratingName:String = 'N/A';
 	public var ratingPercent:Float;
 	public var ratingFC:String;
 	public function RecalculateRating(badHit:Bool = false) {
@@ -3476,26 +3487,38 @@ class PlayState extends MusicBeatState
 		var ret:Dynamic = callOnScripts('onRecalculateRating', null, true);
 		if(ret != LuaUtils.Function_Stop)
 		{
-			ratingName = '?';
+			ratingName = 'N/A';
 			if(totalPlayed != 0) //Prevent divide by 0
 			{
 				// Rating Percent
 				//ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
-				if(totalNotesHit==0 && totalPlayed==0)
-					ratingPercent = 1;
-				else
-					ratingPercent = totalNotesHit / totalPlayed;
+                var accuracyFloat:Float = 0;
+                for(rat in 0...3) {
+                    accuracyFloat += ratingsData[rat].hits * die;
+                }
+
+                die = (numberOfNotes == 0 ? 0 : FlxMath.roundDecimal(accuracyFloat / numberOfArrowNotes * 100, 2));
+
+				ratingPercent = die / numberOfNotes;
 				//trace((totalNotesHit / totalPlayed) + ', Total: ' + totalPlayed + ', notes hit: ' + totalNotesHit);
 
 				// Rating Name
-				ratingName = ratingStuff[ratingStuff.length-1][0]; //Uses last string
-				if(ratingPercent < 1)
-					for (i in 0...ratingStuff.length-1)
-						if(ratingPercent < ratingStuff[i][1])
-						{
-							ratingName = ratingStuff[i][0];
-							break;
-						}
+				if(ratingPercent == 1)
+					ratingName = "Perfect";
+				else if(ratingPercent >= .9)
+					ratingName = "S";
+				else if(ratingPercent >= .8)
+					ratingName = "A";
+				else if(ratingPercent >= .7)
+					ratingName = "B";
+				else if(ratingPercent >= .6)
+					ratingName = "C";
+				else if(ratingPercent >= .5)
+					ratingName = "D";
+				else if(ratingPercent >= .4)
+					ratingName = "E";
+				else
+					ratingName = "F";
 			}
 			fullComboFunction();
 		}
