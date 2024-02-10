@@ -5,10 +5,10 @@ import shaders.WiggleEffect;
 
 class Slut extends BaseStage
 {
-	var whittyBG:FlxSprite;
-	var clocks:FlxSprite;
-	var clockScar:FlxSprite;
-	var clockFever:FlxSprite;
+	var whittyBG:BGSprite;
+	var clocks:BGSprite;
+	var clockScar:BGSprite;
+	var clockFever:BGSprite;
 	var wiggleEffect:WiggleEffect;
 	
 	override function create()

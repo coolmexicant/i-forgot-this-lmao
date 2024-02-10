@@ -1,0 +1,157 @@
+{
+	"animations": [
+		{
+			"offsets": [
+				6,
+				93
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle",
+			"loop": false,
+			"name": "fever idle0"
+		},
+		{
+			"offsets": [
+				90,
+				91
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
+			"name": "fever left0"
+		},
+		{
+			"offsets": [
+				38,
+				29
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
+			"name": "fever down0"
+		},
+		{
+			"offsets": [
+				42,
+				79
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
+			"name": "fever up0"
+		},
+		{
+			"offsets": [
+				22,
+				108
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
+			"name": "fever right0"
+		},
+		{
+			"offsets": [
+				110,
+				91
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFTmiss",
+			"loop": false,
+			"name": "fever left miss"
+		},
+		{
+			"offsets": [
+				41,
+				28
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWNmiss",
+			"loop": false,
+			"name": "fever down miss"
+		},
+		{
+			"offsets": [
+				40,
+				103
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUPmiss",
+			"loop": false,
+			"name": "fever up miss"
+		},
+		{
+			"offsets": [
+				20,
+				105
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHTmiss",
+			"loop": false,
+			"name": "fever right miss"
+		},
+		{
+			"offsets": [
+				27,
+				92
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "hey",
+			"loop": false,
+			"name": "fever hey"
+		},
+		{
+			"offsets": [
+				62,
+				120
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "dodge",
+			"loop": false,
+			"name": "fever dodge"
+		},
+		{
+			"offsets": [
+				11,
+				93
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle-frown",
+			"loop": false,
+			"name": "fever idle frown"
+		}
+	],
+	"vocals_file": "",
+	"no_antialiasing": false,
+	"image": "characters/soulsplit",
+	"position": [
+		0,
+		350
+	],
+	"healthicon": "soulsplit",
+	"flip_x": true,
+	"healthbar_colors": [
+		231,
+		132,
+		163
+	],
+	"camera_position": [
+		0,
+		0
+	],
+	"sing_duration": 4,
+	"scale": 1,
+	"_editor_isPlayer": true
+}

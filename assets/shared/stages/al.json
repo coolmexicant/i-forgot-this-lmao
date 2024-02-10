@@ -12,5 +12,5 @@
 	"camera_opponent": [0, 0],
 	"camera_girlfriend": [0, 0],
 	"camera_speed": 1,
-	"camInt": 200
+	"camInt": 100
 }

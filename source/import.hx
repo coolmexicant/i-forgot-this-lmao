@@ -33,6 +33,7 @@ import backend.BaseStage;
 import backend.Difficulty;
 import backend.Mods;
 import backend.Modchart;
+import backend.WideScreenScale;
 
 import objects.Alphabet;
 import objects.BGSprite;

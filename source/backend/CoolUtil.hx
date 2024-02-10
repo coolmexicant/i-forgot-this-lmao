@@ -174,4 +174,17 @@ class CoolUtil
 		num = Math.floor( num ) / Math.pow(10, precision);
 		return num;
 	}
+
+	public static function bitchRound(num:Float,numDecimalPlaces:Float){
+		var mult = Math.pow(10, numDecimalPlaces);
+		return Math.floor(num * mult + .5) / mult;
+	}
+
+	public static function addZeros(v:String, length:Int, end:Bool = false) {
+		var r = v;
+		while(r.length < length) {
+			r = end ? r + '0': '0$r';
+		}
+		return r;
+	}
 }

@@ -90,6 +90,11 @@ class NoteSplash extends FlxSprite
 
 		var animNum:Int = FlxG.random.int(1, maxAnims);
 		animation.play('note' + direction + '-' + animNum, true);
+
+		if(ClientPrefs.data.splashSkin == "Yoshi")
+			scale.set(.7,.7);
+		else
+			scale.set(1,1);
 		
 		var minFps:Int = 22;
 		var maxFps:Int = 26;

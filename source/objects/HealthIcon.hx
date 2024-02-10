@@ -32,16 +32,17 @@ class HealthIcon extends FlxSprite
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 
 			var width2 = width;
+			var graphic = Paths.image(name, allowGPU);
 			if (width == 450) {
-				loadGraphic(graphic, true, Math.floor(graphic.width / 3), Math.floor(graphic.height)); //Then load it fr // winning icons go br
+				loadGraphic(graphic, true, Math.floor(width / 3), Math.floor(height)); //Then load it fr // winning icons go br
 				iconOffsets[0] = (width - 150) / 3;
 				iconOffsets[1] = (width - 150) / 3;
 				iconOffsets[2] = (width - 150) / 3;
 			} else if(width == 150) { //lets see...
-				loadGraphic(graphic, true, Math.floor(graphic.width), Math.floor(graphic.height)); //Then load it fr // winning icons go br
-				iconOffsets[0] = (width - 150);
+				loadGraphic(graphic, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr // winning icons go br
+				iconOffsets[0] = (width - 150) / 2;
 			} else {
-				loadGraphic(graphic, true, Math.floor(graphic.width / 2), Math.floor(graphic.height)); //Then load it fr // winning icons go br
+				loadGraphic(graphic, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr // winning icons go br
 				iconOffsets[0] = (width - 150) / 2;
 				iconOffsets[1] = (width - 150) / 2;
 			}

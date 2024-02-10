@@ -102,6 +102,19 @@ class PlayState extends MusicBeatState
 	var pauseBlur:BlurFilter;
 	var pauseGlow:GlowFilter;
 
+	public var guiSize(get, null):FlxPoint;
+	private function get_guiSize():FlxPoint
+	{
+		if (Std.isOfType(FlxG.scaleMode, WideScreenScale))
+		{
+			return new FlxPoint(cast(FlxG.scaleMode, WideScreenScale).width, cast(FlxG.scaleMode, WideScreenScale).height);
+		}
+		else
+		{
+			return new FlxPoint(1280, 720);
+		}
+	}
+
 	public var boyfriendMap:Map<String, Character> = new Map<String, Character>();
 	public var dadMap:Map<String, Character> = new Map<String, Character>();
 	public var gfMap:Map<String, Character> = new Map<String, Character>();
@@ -111,6 +124,8 @@ class PlayState extends MusicBeatState
 	public var hscriptArray:Array<HScript> = [];
 	public var instancesExclude:Array<String> = [];
 	#end
+
+	var sex:Float = 0;
 
 	#if LUA_ALLOWED
 	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
@@ -177,6 +192,7 @@ class PlayState extends MusicBeatState
 	public static var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
 	public var camZooming:Bool = false;
+	public var iconZooming:Bool = true;
 	public var camZoomingMult:Float = 1;
 	public var camZoomingDecay:Float = 1;
 	private var curSong:String = "";
@@ -221,7 +237,6 @@ class PlayState extends MusicBeatState
 	public var songMisses:Int = 0;
 	public var scoreTxt:FlxText;
 	var timeTxt:FlxText;
-	var scoreTxtTween:FlxTween;
 
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
@@ -397,6 +412,7 @@ class PlayState extends MusicBeatState
 		{
 			case 'stage': new states.stages.StageWeek1(); //Week 1
 			case 'exesequel': new states.stages.DickShit();
+			case 'al': new states.stages.Slut();
 		}
 
 		if(isPixelStage) {
@@ -481,32 +497,25 @@ class PlayState extends MusicBeatState
 		add(uiGroup);
 
 		Conductor.songPosition = -5000 / Conductor.songPosition;
-		var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
 		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timeTxt.setFormat(Paths.font("pixel.otf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeTxt.scrollFactor.set();
 		timeTxt.alpha = 0;
 		timeTxt.borderSize = 2;
-		timeTxt.visible = updateTime = showTime;
+		timeTxt.visible = updateTime;
 		if(ClientPrefs.data.downScroll) timeTxt.y = FlxG.height - 44;
-		if(ClientPrefs.data.timeBarType == 'Song Name') timeTxt.text = SONG.song;
 
 		timeBar = new Bar(0, timeTxt.y + (timeTxt.height / 4), 'timeBar', function() return songPercent, 0, 1);
 		timeBar.scrollFactor.set();
 		timeBar.screenCenter(X);
 		timeBar.alpha = 0;
-		timeBar.visible = showTime;
+		timeBar.visible = updateTime;
+		timeBar.scale.set(.8,1.1);
 		uiGroup.add(timeBar);
 		uiGroup.add(timeTxt);
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		noteGroup.add(strumLineNotes);
-
-		if(ClientPrefs.data.timeBarType == 'Song Name')
-		{
-			timeTxt.size = 24;
-			timeTxt.y += 3;
-		}
 
 		var splash:NoteSplash = new NoteSplash(100, 100);
 		grpNoteSplashes.add(splash);
@@ -558,15 +567,15 @@ class PlayState extends MusicBeatState
 		iconP2.alpha = ClientPrefs.data.healthBarAlpha;
 		uiGroup.add(iconP2);
 
-		scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, 'Points: 0 ${!instakillOnMiss ? ' • Combo Breaks: 0' : ''} • Acuraccy: 100% • Health: 50%', 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		scoreTxt = new FlxText(0, healthBar.y + 30, guiSize.x, '', 20);
+		scoreTxt.setFormat(Paths.font("pixel.otf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		uiGroup.add(scoreTxt);
 
 		botplayTxt = new FlxText(400, timeBar.y + 55, FlxG.width - 800, "BOTPLAY", 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayTxt.setFormat(Paths.font("pixel.otf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.visible = cpuControlled;
@@ -711,6 +720,7 @@ class PlayState extends MusicBeatState
 	public function reloadHealthBarColors() {
 		healthBar.setColors(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
 			FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
+		timeBar.setColors(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), FlxColor.BLACK);
 	}
 
 	public function addCharacterToList(newCharacter:String, type:Int) {
@@ -1146,16 +1156,8 @@ class PlayState extends MusicBeatState
 			return;
 
 		if(!badHit){
-			if(scoreTxtTween != null)
-				scoreTxtTween.cancel();
-	
-			scoreTxt.scale.x = 1.1;
-			scoreTxt.scale.y = 1.1;
-			scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2, {
-				onComplete: function(twn:FlxTween) {
-					scoreTxtTween = null;
-				}
-			});
+			var scale = (scoreTxt.frameWidth + 100) / scoreTxt.frameWidth;
+			scoreTxt.scale.set(scale, scale);
 		}
 	}
 
@@ -1219,6 +1221,9 @@ class PlayState extends MusicBeatState
 		songLength = FlxG.sound.music.length;
 		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+
+		if (songName != 'tutorial')
+			camZooming = true;
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
@@ -1612,9 +1617,6 @@ class PlayState extends MusicBeatState
 	var freezeCamera:Bool = false;
 	var allowDebugKeys:Bool = true;
 
-	var shownAccuracy:Float = 100.0;
-	var shownScore:Float = 0;
-
 	override public function update(elapsed:Float)
 	{
 		if(!inCutscene && !paused && !freezeCamera) {
@@ -1632,14 +1634,15 @@ class PlayState extends MusicBeatState
 		callOnScripts('onUpdate', [elapsed]);
 
 		super.update(elapsed);
-		shownAccuracy = CoolUtil.truncateFloat(FlxMath.lerp(shownAccuracy,ratingPercent*100, Main.adjustFPS(0.2)),2);
-		if(ratingPercent<1 && shownAccuracy==100)shownAccuracy=99.99;
-		if(Math.abs((ratingPercent*100)-shownAccuracy) <= 0.1)
-			shownAccuracy=CoolUtil.truncateFloat(ratingPercent*100,2);
-		shownScore = Math.floor(FlxMath.lerp(shownScore,songScore,Main.adjustFPS(0.2)));
 
-		var tempScore:String = 'Points: $shownScore ${!instakillOnMiss ? ' • Combo Breaks: $songMisses' : ''} • Acuraccy: $shownAccuracy% • Health: ${CoolUtil.luaRound(health * 50, 0)}%';
+		var tempScore:String = 'Score: $songScore ${!instakillOnMiss ? ' | Misses: $songMisses' : ''} | Accuracy: ${CoolUtil.truncateFloat(ratingPercent*100,2)}% | Average: ${sex}ms | Health: ${CoolUtil.luaRound(health * 50, 0)}%';
 		scoreTxt.text = '${tempScore}\n';
+
+		if (scoreTxt != null)
+		{
+			var l = FlxMath.lerp(scoreTxt.scale.x, 1, FlxMath.bound(.5 * 60 * FlxG.elapsed, 0, 1));
+			scoreTxt.scale.set(l, l);
+		}
 
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
@@ -1686,14 +1689,12 @@ class PlayState extends MusicBeatState
 			var curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.data.noteOffset);
 			songPercent = (curTime / songLength);
 
-			var songCalc:Float = (songLength - curTime);
-			if(ClientPrefs.data.timeBarType == 'Time Elapsed') songCalc = curTime;
+			var songCalc:Float = curTime;
 
 			var secondsTotal:Int = Math.floor(songCalc / 1000);
 			if(secondsTotal < 0) secondsTotal = 0;
 
-			if(ClientPrefs.data.timeBarType != 'Song Name')
-				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+			timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false) + " / " +  FlxStringUtil.formatTime(Math.floor(songLength/1000), false);
 		}
 
 		if (camZooming)
@@ -1857,13 +1858,15 @@ class PlayState extends MusicBeatState
 	// Health icon updaters
 	public dynamic function updateIconsScale(elapsed:Float)
 	{
-		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, Math.exp(-elapsed * 9 * playbackRate));
-		iconP1.scale.set(mult, 1);
-		iconP1.updateHitbox();
-
-		var mult:Float = FlxMath.lerp(1, iconP2.scale.x, Math.exp(-elapsed * 9 * playbackRate));
-		iconP2.scale.set(mult, 1);
-		iconP2.updateHitbox();
+		if(iconZooming){
+			var mult:Float = FlxMath.lerp(1, iconP1.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+			iconP1.scale.set(mult, 1);
+			iconP1.updateHitbox();
+	
+			var mult:Float = FlxMath.lerp(1, iconP2.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+			iconP2.scale.set(mult, 1);
+			iconP2.updateHitbox();
+		}
 	}
 
 	public dynamic function updateIconsPosition()
@@ -1887,19 +1890,20 @@ class PlayState extends MusicBeatState
 		var newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(healthBar.valueFunction(), healthBar.bounds.min, healthBar.bounds.max), healthBar.bounds.min, healthBar.bounds.max, 0, 100);
 		healthBar.percent = (newPercent != null ? newPercent : 0);
 
-		if (iconP1.animation.curAnim.curFrame == 3)
+		if (iconP1.animation.numFrames == 2)
 			iconP1.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : (healthBar.percent < 20) ? 2 : 0;
-		else if (iconP1.animation.curAnim.curFrame == 1)
+		else if (iconP1.animation.numFrames == 0)
 			iconP1.animation.curAnim.curFrame = 0;
 		else
 			iconP1.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0;
 
-		if (iconP2.animation.curAnim.curFrame == 3)
+		if (iconP2.animation.numFrames == 2)
 			iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 2 : (healthBar.percent < 20) ? 1 : 0;
-		else if (iconP2.animation.curAnim.curFrame == 1)
+		else if (iconP2.animation.numFrames == 0)
 			iconP2.animation.curAnim.curFrame = 0;
 		else
 			iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0;
+
 		return health;
 	}
 
@@ -2593,6 +2597,8 @@ class PlayState extends MusicBeatState
 		comboSpr.updateHitbox();
 		rating.updateHitbox();
 
+		sex = CoolUtil.bitchRound(note.strumTime - Conductor.songPosition, 2);
+
 		var seperatedScore:Array<Int> = [];
 
 		if(combo >= 1000) {
@@ -2945,9 +2951,6 @@ class PlayState extends MusicBeatState
 		var result:Dynamic = callOnLuas('opponentNoteHitPre', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('opponentNoteHitPre', [note]);
 
-		if (songName != 'tutorial')
-			camZooming = true;
-
 		if(note.noteType == 'Hey!' && dad.animOffsets.exists('hey')) {
 			dad.playAnim('hey', true);
 			dad.specialAnim = true;
@@ -3157,11 +3160,13 @@ class PlayState extends MusicBeatState
 		if (generatedMusic)
 			notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 
-		iconP1.scale.set(2, 1);
-		iconP2.scale.set(2, 1);
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
+		if(iconZooming){
+			iconP1.scale.set(2, 1);
+			iconP2.scale.set(2, 1);
+	
+			iconP1.updateHitbox();
+			iconP2.updateHitbox();
+		}
 
 		characterBopper(curBeat);
 
@@ -3196,7 +3201,7 @@ class PlayState extends MusicBeatState
 			if (generatedMusic && !endingSong && !isCameraOnForcedPos)
 				moveCameraSection();
 
-			if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.data.camZooms)
+			if (camZooming && ClientPrefs.data.camZooms)
 			{
 				FlxG.camera.zoom += 0.015 * camZoomingMult;
 				camHUD.zoom += 0.03 * camZoomingMult;

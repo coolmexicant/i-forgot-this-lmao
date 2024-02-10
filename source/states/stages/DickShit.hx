@@ -46,11 +46,8 @@ class DickShit extends BaseStage
 		add(girlfriend);
 		// wave = new SinWave();
 		// game.camHUD.shader = wave.shader;
-	}
-	override function createPost() 
-	{
 		iconGF = new HealthIcon('johndick', false);
-		game.uiGroup.add(iconGF);
+		add(iconGF);
 	}
 	override function beatHit() {
 		if (girlfriend != null && curBeat % Math.round(PlayState.gfSpeed * girlfriend.danceEveryNumBeats) == 0 && !girlfriend.getAnimationName().startsWith('sing') && !girlfriend.stunned)
